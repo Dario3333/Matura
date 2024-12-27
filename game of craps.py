@@ -27,6 +27,6 @@ def craps():
 ergebnis = craps()
 
 if ergebnis == 1:
-    print("you won")
+    print("Pass line wins")
 else:
-    print("you lost")
+    print("don't pass line wins")
