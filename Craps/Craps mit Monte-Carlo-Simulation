@@ -6,11 +6,11 @@ def dice_roll():
     return x
 
 
-def craps():
+def craps(iterationen):
     
     wins = 0
     losses = 0
-    for i in range (10000):
+    for i in range (iterationen):
         balance = 1
     
     #Wetten machen
@@ -70,11 +70,10 @@ def craps():
             wins = wins  + 1
         else:
             losses = losses + 1
-#         print(i)
-    return wins, losses
+    print("you won", wins,"times and lost", losses, "times")
+    print("you won", (wins/iterationen)*100 , "% of your games")
 
 
-w, l = craps()
+iterationen = 10000
+craps(iterationen)
 
-print("you won", w,"times and lost", l, "times")
-print("you won", (w/10000)*100 , "% of your games")
