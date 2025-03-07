@@ -47,10 +47,10 @@ def payout(player_hand, dealer_hand, bet, balance):
         return balance - bet
     elif dealer_value > 21 or player_value > dealer_value:
         print("You win")
-        if player_value = 21:
-            if len(player_hand) = 6:
+        if player_value == 21:
+            if len(player_hand) == 6:
                 return balance + 2*bet
-            elif len(player_hand) = 7:
+            elif len(player_hand) == 7:
                 return balance + 3*bet
             else:
                 return balane + 3/2*bet
