@@ -19,12 +19,8 @@ def auswertung(ergebnis, passline, dpassline, come, come_active, balance):
     # Come-Wette auswerten
     if come_active == "win":  # Falls die Come-Wette direkt gewinnt
         balance += come * 2
-    elif come_active == "lose":  # Falls sie direkt verliert
-        balance -= come
     elif come_active == "point_win":  # Falls der Come-Point getroffen wird
         balance += come * 2
-    elif come_active == "point_lose":  # Falls eine 7 kommt, bevor der Come-Point getroffen wird
-        balance -= come
 
     return balance
 
@@ -78,27 +74,29 @@ def crapsmontecarlo(iterationen, filename="craps_results.csv"):
     
     with open(filename, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["Versuch", "Ergebnis", "Come Bet Aktiv", "Come Bet Ergebnis"])
+        writer.writerow(["Versuch", "Ergebnis", "Come Bet Aktiv", "Balance nach Spiel"])
         
         for i in range(1, iterationen + 1):
-            balance = 0
+            balance = 10
             passline = random.randint(0, 1)  # 50% Chance für Pass-Line-Wette
-            dpassline = 1 if passline == 0 else 0  # Don't Pass ist das Gegenteil
-            come = random.randint(0, 1)  # 50% Chance, eine Come-Wette zu setzen
+            if passline == 1:  # Don't Pass ist das Gegenteil
+                dpassline = 0
+            else:
+                dpassline = 1
+            balance -=1
+            come = random.randint(0, 1) # 50% Chance, eine Come-Wette zu setzen
+            if come == 1:
+                balance -= 1
 
             balance = game(passline, dpassline, come, balance)  # Jetzt mit Come-Bets
             print(balance) 
 
-            if balance > 0:  # Gewinn
+            if balance > 10:  # Gewinn
                 wins += 1
-                writer.writerow([i, "win", come])
+                writer.writerow([i, "win", come, balance])
             else:  # Verlust
                 losses += 1
-                writer.writerow([i, "loss", come,])
+                writer.writerow([i, "loss", come, balance])
     
     print("You won", wins, "times and lost", losses, "times")
     print("You won", (wins / iterationen) * 100, "% of your games")
-
-
-
-
