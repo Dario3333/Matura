@@ -2,6 +2,5 @@ import random
 import csv
 from defcraps import *
 
-
-iterationen = 20
-crapsmontecarlo(iterationen)
+iterationen = 300
+crapsmitmontecarlo(iterationen)
