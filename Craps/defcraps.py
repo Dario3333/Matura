@@ -4,7 +4,7 @@ import csv
 def dice_roll():
     return random.randint(1, 6) + random.randint(1, 6)
 
-def auswertung(balance, passline, dpassline, come_results, passbet, dpassbet, come_bets):
+def auswertung(balance, passline, dpassline, come_results, passbet, dpassbet):
     if passline == "win":
         balance += 2 * passbet
     if dpassline == "win":
@@ -19,7 +19,7 @@ def auswertung(balance, passline, dpassline, come_results, passbet, dpassbet, co
             balance += bet
     return balance
 
-def game(balance, passbet, dpassbet, come_bets, initial_come_bet):
+def game(balance, passbet, dpassbet, initial_come_bet):
     passline = ""
     dpassline = ""
     come_results = []
@@ -82,16 +82,10 @@ def game(balance, passbet, dpassbet, come_bets, initial_come_bet):
                     else:
                         pass  # nicht genug Balance für neuen Come-Bet
 
-    return auswertung(balance, passline, dpassline, come_results, passbet, dpassbet, come_bets), passline, dpassline, come_results
+    return auswertung(balance, passline, dpassline, come_results, passbet, dpassbet), passline, dpassline, come_results
 
 def choose_come_bet(balance):
-    # Hier könntest du eine Strategie definieren
-    # Im einfachsten Fall z.B. zufällig zwischen 0 und 2 (oder beliebiger Strategie)
-    # 50% Chance eine neue Come-Bet zu machen
-    if balance >= 1 and random.random() < 0.5:
-        return 1  # Immer 1 setzen, kann aber angepasst werden
-    else:
-        return 0
+    return 1
 
 def crapsmitmontecarlo(iterationen, filename="craps_results.csv"):
     wins = 0
@@ -107,11 +101,10 @@ def crapsmitmontecarlo(iterationen, filename="craps_results.csv"):
             passbet = 0
             dpassbet = 0
             initial_come_bet = 1  # Erster Come-Bet Betrag
-            come_bets = 0
         
             balance -= initial_come_bet
         
-            balance, passline, dpassline, come_results = game(balance, passbet, dpassbet, come_bets, initial_come_bet)
+            balance, passline, dpassline, come_results = game(balance, passbet, dpassbet, initial_come_bet)
         
             writer.writerow([i, passline, dpassline, come_results, balance])
             
@@ -122,4 +115,5 @@ def crapsmitmontecarlo(iterationen, filename="craps_results.csv"):
                 
     print("You won", wins, "times and lost", losses, "times")
     print("You won", (wins / iterationen) * 100, "% of your games")
+
 
