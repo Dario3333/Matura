@@ -23,7 +23,6 @@ def game(balance, passbet, dpassbet, initial_come_bet):
     passline = ""
     dpassline = ""
     come_results = []
-    total_come_bets = initial_come_bet
 
     sum = dice_roll()
     
@@ -45,10 +44,8 @@ def game(balance, passbet, dpassbet, initial_come_bet):
             come_roll = dice_roll()
             if come_roll in (7, 11):
                 come_results.append(("win", initial_come_bet))
-                total_come_bets -= initial_come_bet
             elif come_roll in (2, 3, 12):
                 come_results.append(("lose", initial_come_bet))
-                total_come_bets -= initial_come_bet
             else:
                 active_come_bets[come_roll] = initial_come_bet
 
@@ -57,9 +54,7 @@ def game(balance, passbet, dpassbet, initial_come_bet):
             sum2 = dice_roll()
             # Prüfen, ob eine aktive Come-Wette getroffen wird
             if sum2 in active_come_bets:
-                result = active_come_bets.pop(sum2)
-                come_results.append(("win", result))
-                total_come_bets -= result
+                come_results.append(("win", active_come_bets.pop(sum2)))
             
             if sum2 == point:
                 passline = "win"
@@ -73,17 +68,15 @@ def game(balance, passbet, dpassbet, initial_come_bet):
                 break
             else:
                 # Möglichkeit: neue Come-Wette nach jedem Wurf
-                new_come_bet = choose_come_bet(balance, total_come_bets)
+                new_come_bet = choose_come_bet(balance)
                 if new_come_bet > 0:
                     if balance >= new_come_bet:
                         balance -= new_come_bet
                         come_roll = dice_roll()
                         if come_roll in (7, 11):
                             come_results.append(("win", new_come_bet))
-                            total_come_bets -= new_come_bet
                         elif come_roll in (2, 3, 12):
                             come_results.append(("lose", new_come_bet))
-                            total_come_bets -= new_come_bet
                         else:
                             active_come_bets[come_roll] = new_come_bet
                     else:
@@ -91,36 +84,25 @@ def game(balance, passbet, dpassbet, initial_come_bet):
 
     return auswertung(balance, passline, dpassline, come_results, passbet, dpassbet), passline, dpassline, come_results
 
-def choose_come_bet(balance, total_come_bets):
-    return total_come_bets + 1
+def choose_come_bet(balance):
+    return 1
 
 def crapsmitmontecarlo(iterationen, filename="craps_results.csv"):
-    wins = 0
-    losses = 0
+
     
     with open(filename, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["Versuch", "Passline", "Don't Passline", "Come Ergebnisse", "Balance nach Spiel"])
     
         for i in range(1, iterationen + 1):
-            balance = 10
+            balance = 100
         
             passbet = 0
             dpassbet = 0
             initial_come_bet = 1  # Erster Come-Bet Betrag
-        
-            balance -= initial_come_bet
-        
+                
             balance, passline, dpassline, come_results = game(balance, passbet, dpassbet, initial_come_bet)
         
             writer.writerow([i, passline, dpassline, come_results, balance])
             
-            if balance > 10:
-                wins += 1
-            elif balance < 10:
-                losses +=1
-                
-    print("You won", wins, "times and lost", losses, "times")
-    print("You won", (wins / iterationen) * 100, "% of your games")
-
-
+    print("finished")
