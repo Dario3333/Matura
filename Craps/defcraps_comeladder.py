@@ -47,7 +47,7 @@ def game(balance, passbet, dpassbet, initial_come_bet):
                 come_results.append(("win", initial_come_bet))
                 total_come_bets -= initial_come_bet
             elif come_roll in (2, 3, 12):
-                come_results.append(("lose", initial_come_bet))
+                come_results.append(("lose", initial_come_bet))	
                 total_come_bets -= initial_come_bet
             else:
                 active_come_bets[come_roll] = initial_come_bet
@@ -103,14 +103,14 @@ def crapsmitmontecarlo_cl(iterationen, filename="craps_results.csv"):
         writer.writerow(["Versuch", "Passline", "Don't Passline", "Come Ergebnisse", "Balance nach Spiel"])
     
         for i in range(1, iterationen + 1):
-            balance = 10
+            balance = 100
         
             passbet = 0
             dpassbet = 0
             initial_come_bet = 1  # Erster Come-Bet Betrag
-        
+            
             balance -= initial_come_bet
-        
+                
             balance, passline, dpassline, come_results = game(balance, passbet, dpassbet, initial_come_bet)
         
             writer.writerow([i, passline, dpassline, come_results, balance])

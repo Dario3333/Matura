@@ -41,6 +41,7 @@ def game(balance, passbet, dpassbet, initial_come_bet):
         active_come_bets = {}
         # erste Come-Wette platzieren
         if initial_come_bet > 0:
+            balance -= initial_come_bet
             come_roll = dice_roll()
             if come_roll in (7, 11):
                 come_results.append(("win", initial_come_bet))
@@ -102,7 +103,7 @@ def crapsmitmontecarlo(iterationen, filename="craps_results.csv"):
         writer.writerow(["Versuch", "Passline", "Don't Passline", "Come Ergebnisse", "Balance nach Spiel"])
     
         for i in range(1, iterationen + 1):
-            balance = 10
+            balance = 100
         
             passbet = 0
             dpassbet = 0
