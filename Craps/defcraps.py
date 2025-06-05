@@ -46,8 +46,11 @@ def game(balance, passbet, dpassbet, initial_come_bet):
             if come_roll in (7, 11):
                 come_results.append(("win", initial_come_bet))
                 total_come_bets -= initial_come_bet
-            elif come_roll in (2, 3, 12):
+            elif come_roll in (2, 3):
                 come_results.append(("lose", initial_come_bet))
+                total_come_bets -= initial_come_bet
+            elif come_roll == 12:
+                come_results.append(("tie", initial_come_bet))
                 total_come_bets -= initial_come_bet
             else:
                 active_come_bets[come_roll] = initial_come_bet
@@ -81,9 +84,12 @@ def game(balance, passbet, dpassbet, initial_come_bet):
                         if come_roll in (7, 11):
                             come_results.append(("win", new_come_bet))
                             total_come_bets -= new_come_bet
-                        elif come_roll in (2, 3, 12):
+                        elif come_roll in (2, 3):
                             come_results.append(("lose", new_come_bet))
                             total_come_bets -= new_come_bet
+                        elif come_roll in (2, 3):
+                            come_results.append(("tie", new_come_bet))
+                            total_come_bets -= new_come_bet    
                         else:
                             active_come_bets[come_roll] = new_come_bet
                     else:
