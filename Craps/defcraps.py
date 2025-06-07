@@ -95,33 +95,30 @@ def choose_come_bet(balance, total_come_bets):
     return 0
 
 def crapsmitmontecarlo(iterationen, filename="craps_results.csv"):
-    wins = 0
-    losses = 0
     
     with open(filename, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["Versuch", "Passline", "Don't Passline", "Come Ergebnisse", "Balance nach Spiel"])
-    
+        
+        
+        einsatz_gesamt = 0
+        balance_gesamt = 0
+        anzahl_durchläufe = 0
         for i in range(1, iterationen + 1):
-            balance = 100
+            balance = 1
         
             passbet = 0
             dpassbet = 0
             initial_come_bet = 1  # Erster Come-Bet Betrag
         
-            balance -= initial_come_bet
         
             balance, passline, dpassline, come_results = game(balance, passbet, dpassbet, initial_come_bet)
-        
-            writer.writerow([i, passline, dpassline, come_results, balance])
             
-            if balance > 10:
-                wins += 1
-            elif balance < 10:
-                losses +=1
-                
-    print("You won", wins, "times and lost", losses, "times")
-    print("You won", (wins / iterationen) * 100, "% of your games")
-
-
-
+            if balance != 1:
+                writer.writerow([i, passline, dpassline, come_results, balance])
+                einsatz_gesamt += 1
+                balance_gesamt += balance
+                anzahl_durchläufe += 1
+        
+        print("House Edge:", ((einsatz_gesamt-balance_gesamt)/einsatz_gesamt)*100)
+        print("House Edge", 1 - balance_gesamt/anzahl_durchläufe)
