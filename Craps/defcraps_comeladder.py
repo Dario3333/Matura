@@ -57,6 +57,7 @@ def game(balance, passbet, dpassbet, initial_come_bet):
         while True:
             sum2 = dice_roll()
             new_come_bet = choose_come_bet(balance, total_come_bets)
+            total_come_bets += new_come_bet
             if new_come_bet > 0:
                 if balance >= new_come_bet:
                     balance -= new_come_bet
@@ -91,7 +92,8 @@ def game(balance, passbet, dpassbet, initial_come_bet):
     return auswertung(balance, passline, dpassline, come_results, passbet, dpassbet), passline, dpassline, come_results
 
 def choose_come_bet(balance, total_come_bets):
-    return total_come_bets + 1
+    come_bet = total_come_bets + 1
+    return come_bet
 
 def crapsmitmontecarlo_cl(iterationen, filename="craps_results.csv"):
 
@@ -108,13 +110,14 @@ def crapsmitmontecarlo_cl(iterationen, filename="craps_results.csv"):
             passbet = 0
             dpassbet = 0
             initial_come_bet = 1  # Erster Come-Bet Betrag
-            balance -= initial_come_bet
                 
             balance, passline, dpassline, come_results = game(balance, passbet, dpassbet, initial_come_bet)
             
-            if len(come_results) != 0:
+#             if len(come_results) != 0:
+            if balance != 100:
+#             if not come_results:
                 writer.writerow([i, passline, dpassline, come_results, balance])
                 balance_gesamt += balance
                 anzahl_durchläufe += 1
         
-        print("House Edge", 100 - balance_gesamt/anzahl_durchläufe, "%")
+        print("House Edge", (100 - balance_gesamt/anzahl_durchläufe)*100, "%")
