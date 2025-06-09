@@ -114,7 +114,7 @@ def crapsmitmontecarlo(iterationen, filename="craps_results.csv"):
         
             balance, passline, dpassline, come_results = game(balance, passbet, dpassbet, initial_come_bet)
             
-            if balance != 1:
+            if len(come_results) != 0:
                 writer.writerow([i, passline, dpassline, come_results, balance])
                 einsatz_gesamt += 1
                 balance_gesamt += balance
