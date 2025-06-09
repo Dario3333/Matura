@@ -5,4 +5,4 @@ from defcraps import crapsmitmontecarlo
 
 
 iterationen = 1000000
-crapsmitmontecarlo(iterationen)
+crapsmitmontecarlo_cl(iterationen)
