@@ -56,6 +56,7 @@ def game(balance, passbet, dont_passbet, initial_comebet):
             if roll in active_come_bets:   #prüfen ob eine aktive come bet getroffen wird und dadurch gewinnt
                 result = active_come_bets.pop(roll)
                 come_results.append(("win", result))
+                active_come_bets.pop(roll, None)
                  
             if roll == point:
                 passline = "win"
