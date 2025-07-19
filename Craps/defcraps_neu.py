@@ -116,4 +116,6 @@ def crapsmitmontecarlo_neu(iterationen):
         balance_ges += balance
         total_bets += (passbet  + dont_passbet + all_come_bets)
     
-    print("House-Edge:", (10-(balance_ges/iterationen))*100,"%") #House-Edge nach Formel (Verlust/Einsatz)*100 
+    print("House-Edge 1:", (10-(balance_ges/iterationen))*100,"%") #House-Edge nach Formel (Verlust/Einsatz)*100
+    print("House-Edge 2:", (10*iterationen - balance_ges)/(10*iterationen)*100)
+
