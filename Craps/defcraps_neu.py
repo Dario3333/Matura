@@ -10,6 +10,7 @@ def game(balance, passbet, dont_passbet, initial_comebet):
     come_results = []   #zum alle Ergebnise eintragen, einfacher zum auswerten
     total_come_bets = 0 #insgesamt eingesetztes Geld zählen für die House-Edge Rechnung
     come_out_roll = dice_roll() #erster roll
+    #print("come_out roll:", come_out_roll)
     
     if come_out_roll in (7, 11): #direkt gewonnen/verloren
         passline = "win"
@@ -25,6 +26,7 @@ def game(balance, passbet, dont_passbet, initial_comebet):
         dont_passline = "push"
         
     else:
+        balance -= initial_comebet #initial_come_bet wird erst abgezogen wenn auch eine come bet ausgeführt wird
         point = come_out_roll #come out roll wird zum Point
         active_come_bets = {} #come bets tracken
         total_come_bets += initial_comebet 
@@ -44,23 +46,32 @@ def game(balance, passbet, dont_passbet, initial_comebet):
                     new_come_bet == 0
             
             roll = dice_roll()
-            #prüfen ob come bet direkt gewinnt oder verliert, sonst zu aktven come bets hinzufügen
-            if roll in (7, 11):
-                come_results.append(("win", new_come_bet))
-            elif roll in (2, 3, 12):
-                come_results.append(("lose", new_come_bet))
-            else:
-                active_come_bets[roll] = new_come_bet
-                 
-                 
+            #print("roll:", roll)
+            
             if roll in active_come_bets:   #prüfen ob eine aktive come bet getroffen wird und dadurch gewinnt
                 result = active_come_bets.pop(roll)
                 come_results.append(("win", result))
+                #print("win", roll, result)
                 active_come_bets.pop(roll, None)
+            
+            #prüfen ob come bet direkt gewinnt oder verliert, sonst zu aktven come bets hinzufügen
+            if roll in (7, 11):
+                come_results.append(("win", new_come_bet))
+                #print("direct win")
+            elif roll in (2, 3, 12):
+                come_results.append(("lose", new_come_bet))
+                #print("direct loss")
+            else:
+                active_come_bets[roll] = new_come_bet
+                #print("point established")
+                 
+                 
                  
             if roll == point:
                 passline = "win"
                 dont_passline = "lose"
+                for _,bet in active_come_bets.items():
+                    balance += bet
                 break
             if roll == 7:
                 passline = "lose"
@@ -110,9 +121,9 @@ def crapsmitmontecarlo_neu(iterationen):
         balance -= dont_passbet
         
         initial_comebet = 1
-        balance -= initial_comebet
     
         balance, all_come_bets = game(balance, passbet, dont_passbet, initial_comebet)
+        #print("balance:", balance)
         balance_ges += balance
         total_bets += (passbet  + dont_passbet + all_come_bets)
     
