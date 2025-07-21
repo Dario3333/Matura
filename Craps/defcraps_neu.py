@@ -4,7 +4,7 @@ import csv
 def dice_roll():
     return random.randint(1, 6) + random.randint(1, 6) #Simuliert 2 würfel und addiert sie zusammen
 
-def game(balance, passbet, dont_passbet, initial_comebet):
+def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
     passline = ""
     dont_passline = ""
     come_results = []   #zum alle Ergebnise eintragen, einfacher zum auswerten
@@ -12,9 +12,17 @@ def game(balance, passbet, dont_passbet, initial_comebet):
     come_out_roll = dice_roll() #erster roll
     #print("come_out roll:", come_out_roll)
     
+    if come_out_roll in active_come_bets:   #prüfen ob eine aktive come bet getroffen wird und dadurch gewinnt
+        result = active_come_bets.pop(come_out_roll)
+        come_results.append(("win", result))
+        #print("win", come_out_roll, result)
+        active_come_bets.pop(come_out_roll, None)
+    
     if come_out_roll in (7, 11): #direkt gewonnen/verloren
         passline = "win"
         dont_passline = "lose"
+        if come_out_roll == 7:
+            active_come_bets.clear() #alle aktiven come bets verlieren
         
     
     elif come_out_roll in (2,3):  #direkt gewonnen/verloren
@@ -26,11 +34,12 @@ def game(balance, passbet, dont_passbet, initial_comebet):
         dont_passline = "push"
         
     else:
-        balance -= initial_comebet #initial_come_bet wird erst abgezogen wenn auch eine come bet ausgeführt wird
         point = come_out_roll #come out roll wird zum Point
-        active_come_bets = {} #come bets tracken
-        total_come_bets += initial_comebet 
         new_come_bet = initial_comebet #come bet setzen
+        balance -= new_come_bet #initial_come_bet wird erst abgezogen wenn auch eine come bet ausgeführt wird
+        total_come_bets += new_come_bet
+        #print("bet:", new_come_bet)
+        #print("balance:", balance)
 
 
 
@@ -42,8 +51,10 @@ def game(balance, passbet, dont_passbet, initial_comebet):
                     new_come_bet = chose_new_come_bet()  #neue come bet setzen
                     balance -= new_come_bet
                     total_come_bets += new_come_bet
+                    #print("bet:", new_come_bet)
+                    #print("balance:", balance)
                 else:
-                    new_come_bet == 0
+                    new_come_bet = 0
             
             roll = dice_roll()
             #print("roll:", roll)
@@ -70,20 +81,17 @@ def game(balance, passbet, dont_passbet, initial_comebet):
             if roll == point:
                 passline = "win"
                 dont_passline = "lose"
-                for _,bet in active_come_bets.items():
-                    balance += bet
                 break
+            
             if roll == 7:
                 passline = "lose"
                 dont_passline = "win"
-                for _, bet in active_come_bets.items():
-                    come_results.append(("lose", bet))
+                active_come_bets.clear() #alle aktiven come bets verlieren
                 break
             
             first = False
-            
-            
-    return auswertung(balance, passline, passbet, dont_passline, dont_passbet, come_results), total_come_bets
+                   
+    return auswertung(balance, passline, passbet, dont_passline, dont_passbet, come_results), total_come_bets, active_come_bets
 
 
 def chose_new_come_bet():
@@ -107,11 +115,11 @@ def auswertung(balance, passline, passbet,dont_passline, dont_passbet, come_resu
     return balance
 
 def crapsmitmontecarlo_neu(iterationen):
-    balance_ges = 0
     total_bets = 0
+    active_come_bets = {} #come bets tracken
+    balance = 1000000
     
-    for i in range(1, iterationen + 1):
-        balance = 10
+    for i in range(iterationen):
         
         #Wetten gesetzt
         passbet = 0
@@ -122,11 +130,19 @@ def crapsmitmontecarlo_neu(iterationen):
         
         initial_comebet = 1
     
-        balance, all_come_bets = game(balance, passbet, dont_passbet, initial_comebet)
+        balance, all_come_bets, active_come_bets = game(balance, passbet, dont_passbet, initial_comebet, active_come_bets)
+        #print("active_come_bets:", active_come_bets) 
         #print("balance:", balance)
-        balance_ges += balance
         total_bets += (passbet  + dont_passbet + all_come_bets)
+        #print("total bets:", total_bets)
     
-    print("House-Edge 1:", (10-(balance_ges/iterationen))*100,"%") #House-Edge nach Formel (Verlust/Einsatz)*100
-    print("House-Edge 2:", (10*iterationen - balance_ges)/(10*iterationen)*100)
+    
+    print("active_come_bets:",active_come_bets)
+    print("total bets:", total_bets)
+        
+
+    print("House edge:", (1000000-balance)/total_bets*100)
+    
+    print("balance:", balance)
+    print("iterationen:", iterationen)
 
