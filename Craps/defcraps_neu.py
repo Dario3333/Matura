@@ -16,7 +16,6 @@ def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
         result = active_come_bets.pop(come_out_roll)
         come_results.append(("win", result))
         #print("win", come_out_roll, result)
-        active_come_bets.pop(come_out_roll, None)
     
     if come_out_roll in (7, 11): #direkt gewonnen/verloren
         passline = "win"
@@ -63,7 +62,6 @@ def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
                 result = active_come_bets.pop(roll)
                 come_results.append(("win", result))
                 #print("win", roll, result)
-                active_come_bets.pop(roll, None)
             
             #prüfen ob come bet direkt gewinnt oder verliert, sonst zu aktven come bets hinzufügen
             if roll in (7, 11):
@@ -95,7 +93,7 @@ def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
 
 
 def chose_new_come_bet():
-    return 0
+    return 1
 
 def auswertung(balance, passline, passbet,dont_passline, dont_passbet, come_results):
     if passline == "win":
@@ -114,35 +112,44 @@ def auswertung(balance, passline, passbet,dont_passline, dont_passbet, come_resu
     
     return balance
 
-def crapsmitmontecarlo_neu(iterationen):
-    total_bets = 0
-    active_come_bets = {} #come bets tracken
-    balance = 1000000
+def crapsmitmontecarlo_neu(iterationen, filename="craps_results.csv"):
     
-    for i in range(iterationen):
-        
-        #Wetten gesetzt
-        passbet = 0
-        balance -= passbet
-        
-        dont_passbet = 0
-        balance -= dont_passbet
-        
-        initial_comebet = 1
+    #with open(filename, mode='w', newline='') as file:
+        #writer = csv.writer(file)
+        #writer.writerow(["Versuch", "Gewinn", "Balance nach Runde"])
     
-        balance, all_come_bets, active_come_bets = game(balance, passbet, dont_passbet, initial_comebet, active_come_bets)
-        #print("active_come_bets:", active_come_bets) 
-        #print("balance:", balance)
-        total_bets += (passbet  + dont_passbet + all_come_bets)
+    
+        total_bets = 0
+        active_come_bets = {} #come bets tracken
+        balance = 1000000
+    
+        for i in range(1, iterationen + 1):
+        
+            #Wetten gesetzt
+            passbet = 0
+            balance -= passbet
+        
+            dont_passbet = 0
+            balance -= dont_passbet
+        
+            initial_comebet = 1
+            balance_bevor = balance
+    
+            balance, all_come_bets, active_come_bets = game(balance, passbet, dont_passbet, initial_comebet, active_come_bets)
+            #print("active_come_bets:", active_come_bets) 
+            #print("balance:", balance)
+            total_bets += (passbet  + dont_passbet + all_come_bets)
+            #print("total bets:", total_bets)
+            
+            #writer.writerow([i, balance - balance_bevor, balance])
+    
+    
+        #print("active_come_bets:",active_come_bets)
         #print("total bets:", total_bets)
-    
-    
-    print("active_come_bets:",active_come_bets)
-    print("total bets:", total_bets)
-        
+            
 
-    print("House edge:", (1000000-balance)/total_bets*100)
+        print("House edge:", (1000000-balance)/total_bets*100)
     
-    print("balance:", balance)
-    print("iterationen:", iterationen)
+        #print("balance:", balance)
+        #print("iterationen:", iterationen)
 
