@@ -47,7 +47,7 @@ def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
         while True: #Würfeln bis Point wieder getroffen wird oder eine 7 gewürfelt wird
             if not first: #neue come bets werden erst beim 2. Mal gemacht
                 if balance > 0:
-                    new_come_bet = chose_new_come_bet()  #neue come bet setzen
+                    new_come_bet = chose_new_come_bet(active_come_bets)  #neue come bet setzen
                     balance -= new_come_bet
                     total_come_bets += new_come_bet
                     #print("bet:", new_come_bet)
@@ -88,12 +88,12 @@ def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
                 break
             
             first = False
-                   
+              
     return auswertung(balance, passline, passbet, dont_passline, dont_passbet, come_results), total_come_bets, active_come_bets
 
 
-def chose_new_come_bet():
-    return 1
+def chose_new_come_bet(active_come_bets):
+        return 1
 
 def auswertung(balance, passline, passbet,dont_passline, dont_passbet, come_results):
     if passline == "win":
@@ -114,14 +114,14 @@ def auswertung(balance, passline, passbet,dont_passline, dont_passbet, come_resu
 
 def crapsmitmontecarlo_neu(iterationen, filename="craps_results.csv"):
     
-    #with open(filename, mode='w', newline='') as file:
-        #writer = csv.writer(file)
-        #writer.writerow(["Versuch", "Gewinn", "Balance nach Runde"])
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Versuch", "Gewinn", "Balance nach Runde", "House-Edge nach Runde"])
     
     
         total_bets = 0
         active_come_bets = {} #come bets tracken
-        balance = 1000000
+        balance = 10000000
     
         for i in range(1, iterationen + 1):
         
@@ -141,14 +141,19 @@ def crapsmitmontecarlo_neu(iterationen, filename="craps_results.csv"):
             total_bets += (passbet  + dont_passbet + all_come_bets)
             #print("total bets:", total_bets)
             
-            #writer.writerow([i, balance - balance_bevor, balance])
-    
+            if i % 1 == 0 and total_bets != 0:
+                house_edge = ((10000000-balance)/total_bets*100)
+                writer.writerow([i, balance - balance_bevor, balance, house_edge])
+            elif i % 1 == 0:
+                writer.writerow([i, balance - balance_bevor, balance, "no bets"])
+            
     
         #print("active_come_bets:",active_come_bets)
         #print("total bets:", total_bets)
             
 
-        print("House edge:", (1000000-balance)/total_bets*100)
+        print("House edge:", (10000000-balance)/total_bets*100)
+        return ((10000000-balance)/total_bets*100)
     
         #print("balance:", balance)
         #print("iterationen:", iterationen)
