@@ -4,24 +4,36 @@ import csv
 def dice_roll():
     return random.randint(1, 6) + random.randint(1, 6) #Simuliert 2 würfel und addiert sie zusammen
 
-def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
+def game(balance, passbet, dont_passbet, initial_comebet, initial_dont_comebet, active_come_bets, active_dont_come_bets):
     passline = ""
     dont_passline = ""
     come_results = []   #zum alle Ergebnise eintragen, einfacher zum auswerten
-    total_come_bets = 0 #insgesamt eingesetztes Geld zählen für die House-Edge Rechnung
+    dont_come_results = [] #gleich wie oben einfach für dont come
+    total_come_bets = 0 #insgesamt auf come und don't come bet gesetzte Chips zählen für House-Edge rechnung
     come_out_roll = dice_roll() #erster roll
     #print("come_out roll:", come_out_roll)
     
     if come_out_roll in active_come_bets:   #prüfen ob eine aktive come bet getroffen wird und dadurch gewinnt
         result = active_come_bets.pop(come_out_roll)
         come_results.append(("win", result))
-        #print("win", come_out_roll, result)
+        ##print("win", come_out_roll, result)
+        
+        if come_out_roll in active_dont_come_bets:   #prüfen ob eine aktive don't come bet getroffen wird und dadurch verliert
+            active_dont_come_bets.pop(come_out_roll)
+            #print("lose", come_out_roll)
+            
     
     if come_out_roll in (7, 11): #direkt gewonnen/verloren
         passline = "win"
         dont_passline = "lose"
         if come_out_roll == 7:
             active_come_bets.clear() #alle aktiven come bets verlieren
+            for roll, bet in active_dont_come_bets.items():
+                dont_come_results.append(("win", bet))
+            active_dont_come_bets.clear()
+                #print("win", bet)
+            #print(active_dont_come_bets)
+            
         
     
     elif come_out_roll in (2,3):  #direkt gewonnen/verloren
@@ -36,8 +48,11 @@ def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
         point = come_out_roll #come out roll wird zum Point
         new_come_bet = initial_comebet #come bet setzen
         balance -= new_come_bet #initial_come_bet wird erst abgezogen wenn auch eine come bet ausgeführt wird
+        new_dont_come_bet = initial_dont_comebet #don't come bet setzen
+        balance -= new_dont_come_bet #initial_dont_come_bet wird erst abgezogen wenn auch eine come bet ausgeführt wird
         total_come_bets += new_come_bet
-        #print("bet:", new_come_bet)
+        total_come_bets += new_dont_come_bet
+        #print("bet:", new_dont_come_bet)
         #print("balance:", balance)
 
 
@@ -50,10 +65,14 @@ def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
                     new_come_bet = chose_new_come_bet(active_come_bets)  #neue come bet setzen
                     balance -= new_come_bet
                     total_come_bets += new_come_bet
-                    #print("bet:", new_come_bet)
+                    new_dont_come_bet = chose_new_dont_come_bet(active_dont_come_bets)  #neue don't come bet setzen
+                    balance -= new_dont_come_bet
+                    total_come_bets += new_dont_come_bet
+                    #print("bet:", new_dont_come_bet)
                     #print("balance:", balance)
                 else:
                     new_come_bet = 0
+                    new_dont_come_bet = 0
             
             roll = dice_roll()
             #print("roll:", roll)
@@ -61,17 +80,29 @@ def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
             if roll in active_come_bets:   #prüfen ob eine aktive come bet getroffen wird und dadurch gewinnt
                 result = active_come_bets.pop(roll)
                 come_results.append(("win", result))
-                #print("win", roll, result)
+                ##print("win", roll, result)
+                
+            if roll in active_dont_come_bets:   #prüfen ob eine aktive don't come bet getroffen wird und dadurch verliert
+                active_dont_come_bets.pop(roll)
+                #print("lose", roll)
+            
             
             #prüfen ob come bet direkt gewinnt oder verliert, sonst zu aktven come bets hinzufügen
             if roll in (7, 11):
                 come_results.append(("win", new_come_bet))
-                #print("direct win")
-            elif roll in (2, 3, 12):
-                come_results.append(("lose", new_come_bet))
+                dont_come_results.append(("lose", new_dont_come_bet))
                 #print("direct loss")
+            elif roll in (2, 3):
+                come_results.append(("lose", new_come_bet))
+                dont_come_results.append(("win", new_dont_come_bet))
+                #print("direct win")
+            elif roll == 12:
+                come_results.append(("lose", new_come_bet))
+                dont_come_results.append(("push", new_dont_come_bet))    
+                #print("tie")
             else:
                 active_come_bets[roll] = new_come_bet
+                active_dont_come_bets[roll] = new_dont_come_bet
                 #print("point established")
                  
                  
@@ -85,24 +116,27 @@ def game(balance, passbet, dont_passbet, initial_comebet, active_come_bets):
                 passline = "lose"
                 dont_passline = "win"
                 active_come_bets.clear() #alle aktiven come bets verlieren
+                for roll, bet in active_dont_come_bets.items():#alle aktiven don't come bets gewinnen
+                    dont_come_results.append(("win", bet))
+                    #print("win", bet)
+                active_dont_come_bets.clear()
+                #print(active_dont_come_bets)
                 break
             
             first = False
               
-    return auswertung(balance, passline, passbet, dont_passline, dont_passbet, come_results), total_come_bets, active_come_bets
+    return auswertung(balance, passline, passbet, dont_passline, dont_passbet, come_results, dont_come_results), total_come_bets, active_come_bets, active_dont_come_bets
 
 
 def chose_new_come_bet(active_come_bets):
-    x = 0
-    for roll, bet in active_come_bets.items():
-       x+= bet
-    x += 1
-    if x > 20:
-        return 0
-    else:
-        return x
+    return 0
 
-def auswertung(balance, passline, passbet,dont_passline, dont_passbet, come_results):
+def chose_new_dont_come_bet(active_come_bets):
+    return 0
+
+
+
+def auswertung(balance, passline, passbet,dont_passline, dont_passbet, come_results, dont_come_results):
     if passline == "win":
         balance += 2*passbet  #wenn gewonnen doppelt zurück sonst nicht(bet wurde am anfang schon abgezogen)
         
@@ -117,9 +151,15 @@ def auswertung(balance, passline, passbet,dont_passline, dont_passbet, come_resu
         if result == "win":
             balance += 2*bet  #jeder Gewinn wird doppelt zurückgezahlt
     
+    for result, bet in dont_come_results:
+        if result == "win":
+            balance += 2*bet  #jeder Gewinn wird doppelt zurückgezahlt
+        elif result == "push":
+            balance += bet #bei Unentschieden Einsatz zurückgezahlt
+    
     return balance
 
-def crapsmitmontecarlo_neu_cl(iterationen, filename="craps_results.csv"):
+def crapsmitmontecarlo_neu_dont(iterationen, filename="craps_results.csv"):
     
     with open(filename, mode='w', newline='') as file:
         writer = csv.writer(file)
@@ -128,6 +168,7 @@ def crapsmitmontecarlo_neu_cl(iterationen, filename="craps_results.csv"):
     
         total_bets = 0
         active_come_bets = {} #come bets tracken
+        active_dont_come_bets = {}
         balance = 10000000
     
         for i in range(1, iterationen + 1):
@@ -139,30 +180,34 @@ def crapsmitmontecarlo_neu_cl(iterationen, filename="craps_results.csv"):
             dont_passbet = 0
             balance -= dont_passbet
         
-            initial_comebet = 1
+            initial_comebet = 0
+            
+            initial_dont_comebet = 1
+            
             balance_bevor = balance
     
-            balance, all_come_bets, active_come_bets = game(balance, passbet, dont_passbet, initial_comebet, active_come_bets)
-            #print("active_come_bets:", active_come_bets) 
+            balance, all_come_bets, active_come_bets, active_dont_come_bets = game(balance, passbet, dont_passbet, initial_comebet, initial_dont_comebet, active_come_bets, active_dont_come_bets)
+            #print("active_dont_come_bets:", active_dont_come_bets) 
             #print("balance:", balance)
             total_bets += (passbet  + dont_passbet + all_come_bets)
-            #print("total bets:", total_bets)
+            ##print("total bets:", total_bets)
             
-            if i % 1 == 0 and total_bets != 0:
+            if i % 100 == 0 and total_bets != 0:
                 house_edge = ((10000000-balance)/total_bets*100)
                 writer.writerow([i, balance - balance_bevor, balance, house_edge])
-            elif i % 1 == 0:
+            elif total_bets == 0:
                 writer.writerow([i, balance - balance_bevor, balance, "no bets"])
             
     
-        #print("active_come_bets:",active_come_bets)
-        #print("total bets:", total_bets)
+        ##print("active_come_bets:",active_come_bets)
+        ##print("total bets:", total_bets)
             
 
         print("House edge:", (10000000-balance)/total_bets*100)
         return ((10000000-balance)/total_bets*100)
     
-        #print("balance:", balance)
-        #print("iterationen:", iterationen)
+        ##print("balance:", balance)
+        ##print("iterationen:", iterationen)
+
 
 
